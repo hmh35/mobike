@@ -19,9 +19,13 @@ class ProxyProvider:
 
     def get_list(self):
         logger.debug("Getting proxy list")
-        r = requests.get("https://jsonblob.com/api/jsonBlob/31bf2dc8-00e6-11e7-a0ba-e39b7fdbe78b", timeout=10)
-        proxies = ujson.decode(r.text)
-        logger.debug("Got %s proxies", len(proxies))
+        #r = requests.get("http://114.215.99.158:8080/Step/", timeout=10)
+        #r = requests.get("https://jsonblob.com/api/jsonBlob/e0ad6c9a-a1f9-11e7-a649-b1a0b98a167c", timeout=10)
+        #r = requests.get("https://jsonblob.com/api/jsonBlob/4f177512-ac39-11e7-a12e-11742358a0f9", timeout=10)        
+        #proxies = ujson.decode(r.text)
+        with open("E:\mobike-crawler\modules\ip.json",'r') as load_f:
+            proxies = ujson.load(load_f)
+        logging.warning("Got %s proxies", len(proxies))
         self._proxies = list(map(lambda p: Proxy(p), proxies))
 
     def pick(self):

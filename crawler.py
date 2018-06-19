@@ -30,13 +30,12 @@ class Crawler:
     def get_nearby_bikes(self, args):
         try:
             url = "https://mwx.mobike.com/mobike-api/rent/nearbyBikesInfo.do"
-
-            payload = "latitude=%s&longitude=%s&errMsg=getMapCenterLocation" % (args[0], args[1])
-
+            payload = "latitude=%6f&longitude=%5f&errMsg=getMapCenterLocation" % (args[1],args[0])
+            
             headers = {
                 'charset': "utf-8",
                 'platform': "4",
-                "referer":"https://servicewechat.com/wx40f112341ae33edb/1/",
+                "referer":"https://servicewechat.com/wx80f809371ae33eda/47/",
                 'content-type': "application/x-www-form-urlencoded",
                 'user-agent': "MicroMessenger/6.5.4.1000 NetType/WIFI Language/zh_CN",
                 'host': "mwx.mobike.com",
@@ -44,7 +43,8 @@ class Crawler:
                 'accept-encoding': "gzip",
                 'cache-control': "no-cache"
             }
-
+            #print (payload + "\n")
+            #return
             self.request(headers, payload, args, url)
         except Exception as ex:
             print(ex)
@@ -58,6 +58,7 @@ class Crawler:
                     proxies={"https": proxy.url},
                     timeout=5,verify=False
                 )
+                
 
                 with self.lock:
                     with sqlite3.connect(self.db_name) as c:
@@ -83,16 +84,28 @@ class Crawler:
                 proxy.fatal_error()
 
     def start(self):
-        left = 30.7828453209
-        top = 103.9213455517
-        right = 30.4781772402
-        bottom = 104.2178123382
+      
+       # left = 119.4114228
+        #top = 25.9612926
+        #right = 119.2392771
+        #bottom = 26.1145733
 
+        left = 119.582995
+        top= 25.844671
+        right = 119.060972
+        bottom= 26.231573
+        #left = 119.4114228
+        #top = 25.9612926
+        #right = 119.2392771
+        #bottom = 26.1145733
+
+    
+        
         offset = 0.002
 
         if os.path.isfile(self.db_name):
-            os.remove(self.db_name)
-
+               os.remove(self.db_name)
+                
         try:
             with sqlite3.connect(self.db_name) as c:
                 c.execute('''CREATE TABLE mobike
@@ -100,7 +113,7 @@ class Crawler:
         except Exception as ex:
             pass
 
-        executor = ThreadPoolExecutor(max_workers=250)
+        executor = ThreadPoolExecutor(max_workers=10000)
         print("Start")
         self.total = 0
         lat_range = np.arange(left, right, -offset)
@@ -109,7 +122,8 @@ class Crawler:
             for lon in lon_range:
                 self.total += 1
                 executor.submit(self.get_nearby_bikes, (lat, lon))
-
+              
+        #time.sleep(10900)
         executor.shutdown()
         self.group_data()
 
